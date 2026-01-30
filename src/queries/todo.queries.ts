@@ -9,7 +9,7 @@ import {
   readTodos,
   updateTodoStatus,
   deleteTodo,
-} from "@/api/todo.api";
+} from "@/services/todo.api";
 
 
 export function useTodoQuery() {

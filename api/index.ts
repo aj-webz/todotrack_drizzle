@@ -6,6 +6,6 @@ const app = new Hono();
 
 app.use("*", cors());
 
-app.route("/todos", todoRoutes);
+app.route("api/todos", todoRoutes);
 
 export default app;

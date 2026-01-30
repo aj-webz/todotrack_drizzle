@@ -4,7 +4,9 @@ import type {
     TodoStatus,
 } from "@/store/todo/todo.types";
 
-const baseUrl = import.meta.env.DEV ? "http://localhost:4000/api/todos" : "/api/todos";
+const baseUrl = import.meta.env.DEV
+  ? "http://localhost:4000/api/todos"
+  : "/api/todos";
 
 
 export async function readTodos(): Promise<Todo[]> {
