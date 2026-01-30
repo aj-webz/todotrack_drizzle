@@ -15,23 +15,32 @@ import {
 } from "@/services/todo.api";
 
 
+
 export function useTodoQuery() {
   return useQuery<Todo[]>({
     queryKey: queryKey.all,
     queryFn: readTodos,
+
+    initialData: [],
+
     staleTime: Infinity,
     gcTime: Infinity,
+
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    retry: false,
   });
 }
+
+
 
 export function useCreateTodo() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: CreateTodoInput) => createTodo(input),
+    retry: false,
 
     onMutate: (input) => {
       const previousTodos =
@@ -43,7 +52,7 @@ export function useCreateTodo() {
         status: "in-progress",
         completed: false,
         created: new Date(),
-        endDate: null,
+        endDate: input.endDate ?? null,
       };
 
       queryClient.setQueryData<Todo[]>(queryKey.all, [
@@ -73,26 +82,26 @@ export function useUpdateTodoStatus() {
       status: TodoStatus;
     }) => updateTodoStatus(id, status),
 
-    onMutate: ({ id, status }) => {
+    retry: false,
 
+    onMutate: ({ id, status }) => {
       const previousTodos =
         queryClient.getQueryData<Todo[]>(queryKey.all);
 
-      queryClient.setQueryData<Todo[]>(queryKey.all, (old) =>
-        old?.map((todo) =>
+      queryClient.setQueryData<Todo[]>(queryKey.all, (old = []) =>
+        old.map((todo) =>
           todo.id === id
             ? {
-              ...todo,
-              status,
-              completed: status === "completed",
-            }
+                ...todo,
+                status,
+                completed: status === "completed",
+              }
             : todo
         )
       );
 
       return { previousTodos };
     },
-
 
     onError: (_err, _vars, context) => {
       queryClient.setQueryData(queryKey.all, context?.previousTodos);
@@ -101,18 +110,20 @@ export function useUpdateTodoStatus() {
 }
 
 
+
 export function useDeleteTodo() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => deleteTodo(id),
+    retry: false,
 
     onMutate: (id) => {
       const previousTodos =
         queryClient.getQueryData<Todo[]>(queryKey.all);
 
-      queryClient.setQueryData<Todo[]>(queryKey.all, (old) =>
-        old?.filter((todo) => todo.id !== id)
+      queryClient.setQueryData<Todo[]>(queryKey.all, (old = []) =>
+        old.filter((todo) => todo.id !== id)
       );
 
       return { previousTodos };
