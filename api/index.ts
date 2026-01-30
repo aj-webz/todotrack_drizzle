@@ -5,7 +5,7 @@ import todoRoutes from "./routes/todo.routes";
 const app = new Hono();
 
 app.use("*", cors());
-
-app.route("api/todos", todoRoutes);
+app.route("/api/todos", todoRoutes);
 
 export default app;
+
