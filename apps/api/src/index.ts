@@ -83,4 +83,4 @@ app.delete("/:id", (c) => {
 });
 
 export const config = {runtime :"edge"}
-export default app;
+export default app.fetch;
