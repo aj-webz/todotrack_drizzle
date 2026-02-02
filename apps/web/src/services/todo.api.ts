@@ -2,10 +2,10 @@ import type {
   Todo,
   CreateTodoInput,
   TodoStatus,
-} from "@/store/todo/todo.types";
+} from "@repo/shared";
 
-const baseUrl = "https://backend-ten-zeta-54.vercel.app";
-
+//const baseUrl = "https://backend-ten-zeta-54.vercel.app";
+const baseUrl = "http://localhost:4000"
 
 export async function readTodos(): Promise<Todo[]> {
   try {

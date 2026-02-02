@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { Todo } from "@/store/todo/todo.types"
+import type { Todo } from "@repo/shared"
 import { format } from "date-fns"
 
 interface AddedListProps {

@@ -5,7 +5,7 @@ import type {
   Todo,
   CreateTodoInput,
   TodoStatus,
-} from "@/store/todo/todo.types";
+} from "@repo/shared";
 
 import {
   readTodos,
@@ -20,7 +20,7 @@ export function useTodoQuery() {
   return useQuery<Todo[]>({
     queryKey: queryKey.all,
     queryFn: readTodos,
-    initialData: [],
+    initialData:[],
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
@@ -33,15 +33,11 @@ export function useTodoQuery() {
 
 export function useCreateTodo() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: CreateTodoInput) => createTodo(input),
     retry: false,
-
     onMutate: (input) => {
-      const todos =
-        queryClient.getQueryData<Todo[]>(queryKey.all) ?? [];
-
+      const todos = queryClient.getQueryData<Todo[]>(queryKey.all) ?? [];
       const optimisticTodo: Todo = {
         id: crypto.randomUUID(),
         title: input.title,
@@ -51,7 +47,6 @@ export function useCreateTodo() {
         created: new Date(),
         endDate: input.endDate ?? null,
       };
-
       queryClient.setQueryData<Todo[]>(queryKey.all, [
         ...todos,
         optimisticTodo,
@@ -59,7 +54,6 @@ export function useCreateTodo() {
 
       return { todos };
     },
-
     onError: (_e, _v, ctx) => {
       queryClient.setQueryData(queryKey.all, ctx?.todos);
     },
@@ -106,8 +100,6 @@ export function useUpdateTodoStatus() {
     },
   });
 }
-
-
 
 export function useDeleteTodo() {
   const queryClient = useQueryClient();

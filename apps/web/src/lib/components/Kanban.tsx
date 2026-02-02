@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 
-import type { Todo, TodoStatus } from "@/store/todo/todo.types";
+import type { Todo,TodoStatus } from "@repo/shared";
 
 import {
   useTodoQuery,

@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CreateTodoSchema } from "@/store/todo/todoSchema"
+import { CreateTodoSchema } from "@repo/shared"
 import { useTodoStore } from "@/store/todo/todo.store"
 import TodoList from "./TodoList"
 

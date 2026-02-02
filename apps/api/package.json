@@ -1,0 +1,17 @@
+{
+  "name": "api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+    "hono": "^4.11.7"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
+  }
+}
