@@ -50,5 +50,5 @@ routes.delete("/:id", (c) => {
   return c.body(null, 204);
 });
 
-app.route("/", routes);
+app.route("/api", routes);
 export default app;
