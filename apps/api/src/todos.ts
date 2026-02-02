@@ -10,7 +10,7 @@ import {
   type Todo,
 } from "@repo/shared";
 
-import { todos } from "./todo.store.js";
+import { todos } from "./todo.store";
 
 const app = new Hono();
 
