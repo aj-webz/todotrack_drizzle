@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { serve } from "@hono/node-server";
 import { todos } from "./todo.store.js";
 import { Todo, TodoStatus } from "@repo/shared";
 
@@ -42,7 +41,4 @@ routes.delete("/:id", (c) => {
 });
 
 app.route("/", routes);
-
-serve({ fetch: app.fetch, port: 4000});
-console.log("Server is running at http://localhost:4000")
 export default app;
