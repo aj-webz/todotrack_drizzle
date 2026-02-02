@@ -10,9 +10,10 @@ import {
   type Todo,
 } from "@repo/shared";
 
-import { todos } from "./todo.store.js"; 
+import { todos } from "./todo.store.js";
 
 const app = new Hono();
+
 
 app.use(
   "/*",
@@ -22,7 +23,6 @@ app.use(
     allowHeaders: ["Content-Type"],
   })
 );
-
 
 app.options("*", (c) => c.body(null, 204));
 
@@ -49,8 +49,9 @@ app.post("/", async (c) => {
   return c.json(todo, 201);
 });
 
+
 const UpdateStatusSchema = z.object({
-  status: TodoStatusSchema,
+  status: z.enum(["in-progress", "completed"]) 
 });
 
 app.patch("/:id/status", async (c) => {
@@ -81,5 +82,5 @@ app.delete("/:id", (c) => {
   return c.body(null, 204);
 });
 
-
+export const config = {runtime :"edge"}
 export default app;
