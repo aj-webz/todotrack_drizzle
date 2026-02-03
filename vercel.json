@@ -1,0 +1,14 @@
+{
+  "buildCommand": "pnpm --filter api build",
+  "functions": {
+    "apps/api/dist/index.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "apps/api/dist/index.js"
+    }
+  ]
+}
