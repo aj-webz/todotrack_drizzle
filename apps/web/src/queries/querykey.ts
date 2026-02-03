@@ -1,3 +1,3 @@
 export const queryKey = {
-    all :["todos"] as const,
+    all:["todos"] as const,
 }

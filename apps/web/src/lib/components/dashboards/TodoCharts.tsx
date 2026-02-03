@@ -17,14 +17,13 @@ import {
 
 import { isToday } from "date-fns";
 import { useTodoQuery } from "@/queries/todo.queries";
-import type { Todo } from "@/store/todo/todo.types";
-
+import type { Todo } from "@repo/shared";
 function dataVariation(todos: Todo[]) {
   return [
     {
       label: "Today",
       value: todos.filter((t) =>
-        isToday(new Date(t.created))
+        isToday(new Date(t.createdAt))
       ).length,
     },
     {

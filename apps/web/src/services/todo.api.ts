@@ -5,20 +5,15 @@ import {
   type TodoStatus,
 } from "@repo/shared";
 
-const baseUrl = "https://todotrack-api.vercel.app";
+const baseUrl = "http://localhost:4000";
 
-export async function readTodos(): Promise<Todo[]> {
+export async function readTodos(){
   const res = await fetch(baseUrl);
-
-  if (!res.ok) {
-    throw new Error(`Fetch failed: ${res.status}`);
-  }
-
+  console.log("status:",res.status);
   const json = await res.json();
-
-  return TodoSchema.array().parse(json);
+  console.log(json);
+  return json
 }
-
 
 export async function createTodo(
   input: CreateTodoInput
@@ -33,12 +28,8 @@ export async function createTodo(
     throw new Error(`Create failed: ${res.status}`);
   }
 
-  const json = await res.json();
-
- 
-  return TodoSchema.parse(json);
+  return TodoSchema.parse(await res.json());
 }
-
 
 export async function updateTodoStatus(
   id: string,
@@ -54,16 +45,11 @@ export async function updateTodoStatus(
     throw new Error(`Update failed: ${res.status}`);
   }
 
-  const json = await res.json();
-
-  return TodoSchema.parse(json);
+  return TodoSchema.parse(await res.json());
 }
 
 export async function deleteTodo(id: string): Promise<void> {
-  const res = await fetch(`${baseUrl}/${id}`, {
-    method: "DELETE",
-  });
-
+  const res = await fetch(`${baseUrl}/${id}`, { method: "DELETE" });
   if (!res.ok) {
     throw new Error(`Delete failed: ${res.status}`);
   }

@@ -1,16 +1,13 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { nanoid } from "nanoid";
+import { serve } from "@hono/node-server";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
 
-import {
-  TodoSchema,
-  CreateTodoSchema,
-  TodoStatusSchema,
-  type Todo,
-} from "@repo/shared";
-
-import { todos } from "./todo.store";
+import { TodoSchema, CreateTodoSchema } from "@repo/shared";
+import { db, todos } from "@repo/db";
+import { handle } from "hono/vercel";
 
 const app = new Hono();
 
@@ -23,65 +20,89 @@ app.use(
   })
 );
 
-app.options("*", (c) => {
-  return c.body(null, 204);
-});
+app.options("*", (c) => c.body(null, 204));
 
 
-app.get("/", (c) => {
-  return c.json(todos);
+app.get("/", async (c) => {
+  const rows = await db.select().from(todos);
+
+  return c.json(
+    rows.map((r) =>
+      TodoSchema.parse({
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        status: r.status,
+        completed: r.completed,
+      })
+    ),
+    200
+  );
 });
 
 
 app.post("/", async (c) => {
-  const raw = await c.req.json();
-  const data = CreateTodoSchema.parse(raw);
-  const todo: Todo = TodoSchema.parse({
-    id: nanoid(),
-    title: data.title,
-    description: data.description,
-    status: "in-progress",
-    completed: false,
-    created: new Date(),
-    endDate: data.endDate ?? null,
-  });
+  const input = CreateTodoSchema.parse(await c.req.json());
 
-  todos.push(todo);
-  return c.json(todo, 201);
+  const [row] = await db
+    .insert(todos).values({
+      id: nanoid(),
+      title: input.title,
+      description: input.description,
+      status: "in-progress",
+      completed: false,
+    })
+    .returning();
+
+  return c.json(
+    TodoSchema.parse({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      status: row.status,
+      completed: row.completed,
+    }),
+    201
+  );
 });
 
 
 const UpdateStatusSchema = z.object({
-  status: z.enum(["in-progress", "completed"]) 
+  status: z.enum(["in-progress", "completed"]),
 });
 
 app.patch("/:id/status", async (c) => {
   const { id } = c.req.param();
-  const body = UpdateStatusSchema.parse(await c.req.json());
+  const { status } = UpdateStatusSchema.parse(await c.req.json());
 
-  const todo = todos.find((t) => t.id === id);
-  if (!todo) {
-    return c.json({ message: "Todo not found" }, 404);
-  }
+  const [row] = await db
+    .update(todos)
+    .set({
+      status,
+      completed: status === "completed",
+    })
+    .where(eq(todos.id, id))
+    .returning();
 
-  todo.status = body.status;
-  todo.completed = body.status === "completed";
+  if (!row) return c.json({ message: "Not found" }, 404);
 
-  return c.json(todo);
+  return c.json(
+    TodoSchema.parse({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      status: row.status,
+      completed: row.completed,
+    }),
+    200
+  );
 });
 
 
-app.delete("/:id", (c) => {
+app.delete("/:id", async (c) => {
   const { id } = c.req.param();
-  const index = todos.findIndex((t) => t.id === id);
-
-  if (index === -1) {
-    return c.json({ message: "Todo not found" }, 404);
-  }
-
-  todos.splice(index, 1);
+  await db.delete(todos).where(eq(todos.id, id));
   return c.body(null, 204);
 });
 
-export const config = {runtime :"edge"}
-export default app.fetch;
+export default handle(app);

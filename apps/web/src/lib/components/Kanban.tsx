@@ -1,5 +1,3 @@
-"use client";
-
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format } from "date-fns";
 
@@ -16,92 +14,79 @@ import {
 } from "@/queries/todo.queries";
 
 
+
 const isTodoStatus = (value: string): value is TodoStatus =>
   value === "in-progress" || value === "completed";
 
 const statusColumn: {
   id: TodoStatus;
   label: string;
-  headerColor: string;
   borderColor: string;
-  badgeColor: string;
 }[] = [
   {
     id: "in-progress",
     label: "In Progress",
-    headerColor: "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-900",
     borderColor: "border-blue-400",
-    badgeColor: "bg-blue-600 text-white",
   },
   {
     id: "completed",
     label: "Completed",
-    headerColor: "bg-gradient-to-r from-green-50 to-green-100 text-green-900",
     borderColor: "border-green-400",
-    badgeColor: "bg-green-600 text-white",
   },
 ];
 
-export const KanbanBoard = () => {
-  const { data: todos = [] } = useTodoQuery();
-  const updateTodoStatus = useUpdateTodoStatus();
-  const { isPending } = updateTodoStatus;
 
-  const todosByStatus = statusColumn.reduce(
-    (acc, col) => {
-      acc[col.id] = todos.filter((t) => t.status === col.id);
-      return acc;
-    },
-    {} as Record<TodoStatus, Todo[]>
-  );
+
+export const KanbanBoard = () => {
+  const { data: todos = [], isLoading } = useTodoQuery(); 
+  const updateTodoStatus = useUpdateTodoStatus();
+
+  if (isLoading) {
+    return <div className="p-6">Loading todos...</div>;
+  }
+
+  const todosByStatus: Record<TodoStatus, Todo[]> = {
+    "in-progress": [],
+    completed: [],
+  };
+
+  for (const todo of todos) {
+    todosByStatus[todo.status].push(todo);
+  }
 
   const onDragEnd = (result: any) => {
-    if (!result.destination) return;
+    const { destination, source, draggableId } = result;
 
-    const sourceStatus = result.source.droppableId;
-    const destStatus = result.destination.droppableId;
-    if (sourceStatus === destStatus) return;
-    if (!isTodoStatus(destStatus)) return;
+    if (!destination) return;
+    if (destination.droppableId === source.droppableId) return;
 
-    const todoId = result.draggableId.replace("todo-", "");
-    if (!todoId) return;
+    if (!isTodoStatus(destination.droppableId)) return;
 
-    updateTodoStatus.mutate({ id: todoId, status: destStatus });
+    const todoId = draggableId.replace("todo-", "");
+
+    updateTodoStatus.mutate({
+      id: todoId,
+      status: destination.droppableId,
+    });
   };
 
   return (
-    <DragDropContext onDragEnd={isPending ? () => {} : onDragEnd}>
-      <div className="flex gap-5 overflow-x-auto pb-4 md:grid md:grid-cols-2 md:overflow-visible">
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="grid grid-cols-2 gap-6">
         {statusColumn.map((column) => (
-          <Card
-            key={column.id}
-            className="flex flex-col bg-white rounded-xl min-w-[90vw] sm:min-w-[70vw] md:min-w-0 shadow-sm border"
-          >
-            <CardHeader
-              className={cn(
-                "shadow sticky top-0 z-10 p-8 rounded-xl",
-                column.headerColor
-              )}
-            >
-              <CardTitle className="flex items-center justify-between text-sm md:text-xl font-semibold">
-                {column.label}
-                <span
-                  className={cn("text-xs p-2 rounded-sm", column.badgeColor)}
-                >
-                  {todosByStatus[column.id].length}
-                </span>
+          <Card key={column.id}>
+            <CardHeader>
+              <CardTitle>
+                {column.label} ({todosByStatus[column.id].length})
               </CardTitle>
             </CardHeader>
 
             <Droppable droppableId={column.id}>
-              {(provided, snapshot) => (
+              {(provided) => (
                 <CardContent
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={cn(
-                    "flex-1 space-y-4 p-4 overflow-y-auto max-h-[70vh] transition-colors",
-                    snapshot.isDraggingOver && "bg-linear-to-b from-neutral-50 to-neutral-100"
-                  )}
+                  className="space-y-4 min-h-[100px]"
                 >
                   {todosByStatus[column.id].map((todo, index) => (
                     <TodoCard
@@ -122,6 +107,8 @@ export const KanbanBoard = () => {
   );
 };
 
+
+
 const TodoCard = ({
   todo,
   index,
@@ -135,59 +122,26 @@ const TodoCard = ({
 
   return (
     <Draggable draggableId={`todo-${todo.id}`} index={index}>
-      {(provided, snapshot) => (
+      {(provided) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={cn(
-            "transition-all",
-            snapshot.isDragging && "rotate-1 scale-[1.03]"
-          )}
         >
-          <Card
-            className={cn(
-              "relative bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border-l-4",
-              borderColor,
-              snapshot.isDragging && "shadow-xl"
-            )}
-          >
-            <CardContent className="p-4 space-y-3 text-sm">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold leading-snug line-clamp-2">
-                  {todo.title}
-                </h3>
-                <Badge
-                  className={cn(
-                    "text-[10px] capitalize",
-                    todo.status === "completed"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-blue-100 text-blue-700"
-                  )}
-                >
-                  {todo.status}
-                </Badge>
-              </div>
+          <Card className={cn("border-l-4", borderColor)}>
+            <CardContent className="p-4 space-y-2">
+              <h3 className="font-semibold">{todo.title}</h3>
 
-              <div className="flex flex-col sm:flex-row sm:justify-between gap-1 text-xs text-neutral-500">
-                <span>
-                  Created: {format(new Date(todo.created), "dd MMM yyyy")}
-                </span>
-                {todo.endDate && (
-                  <span>
-                    End: {format(new Date(todo.endDate), "dd MMM yyyy")}
-                  </span>
-                )}
-              </div>
+              <Badge>{todo.status}</Badge>
 
-              <p className="text-sm text-neutral-700 line-clamp-3">
-                {todo.description}
+              <p className="text-xs text-muted-foreground">
+                Created:{" "}
+                {format(new Date(todo.createdAt), "dd MMM yyyy")}
               </p>
 
               <Button
-                variant="destructive"
                 size="sm"
-                className="w-full sm:w-fit"
+                variant="destructive"
                 onClick={() => deleteTodo.mutate(todo.id)}
               >
                 Delete

@@ -1,12 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { CalendarIcon, Plus } from "lucide-react";
-import type { SubmitHandler } from "react-hook-form";
+import { Plus } from "lucide-react";
 
 import {
   Sheet,
@@ -17,51 +14,36 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 import { useCreateTodo } from "@/queries/todo.queries";
-import { CreateTodoSchema } from "@repo/shared";
-
-
-type FormValues = z.infer<typeof CreateTodoSchema>;
+import { CreateTodoSchema, type CreateTodoInput } from "@repo/shared";
 
 export function CreateTodoSheet() {
   const createTodo = useCreateTodo();
   const [open, setOpen] = React.useState(false);
 
-  const form = useForm<FormValues>({
+  const form = useForm<CreateTodoInput>({
     resolver: zodResolver(CreateTodoSchema),
     defaultValues: {
       title: "",
       description: "",
-      endDate: null,
     },
   });
 
-  const onSubmit: SubmitHandler<FormValues> = (values) => {
-    createTodo.mutate(
-      {
-        title: values.title,
-        description: values.description,
-        endDate: values.endDate,
+  const onSubmit: SubmitHandler<CreateTodoInput> = (values) => {
+    createTodo.mutate(values, {
+      onSuccess: () => {
+        form.reset({
+          title: "",
+          description: "",
+        });
+        setOpen(false);
       },
-      {
-        onSuccess: () => {
-          form.reset();
-          setTimeout(() => setOpen(false), 0);
-        },
-      }
-    );
+    });
   };
 
   return (
@@ -109,38 +91,6 @@ export function CreateTodoSheet() {
                 {form.formState.errors.description.message}
               </p>
             )}
-          </div>
-
-          {/* End Date */}
-          <div className="grid gap-2">
-            <Label>End Date</Label>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="justify-start text-left"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {form.watch("endDate")
-                    ? format(form.watch("endDate")!, "PPP")
-                    : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent className="p-0">
-                <Calendar
-                  mode="single"
-                  selected={form.watch("endDate") ?? undefined}
-                  onSelect={(date) =>
-                    form.setValue("endDate", date ?? null, {
-                      shouldDirty: true,
-                    })
-                  }
-                />
-              </PopoverContent>
-            </Popover>
           </div>
 
           <SheetFooter className="mt-auto gap-2">
