@@ -1,22 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "skipLibCheck": true,
-    "paths": {
-      "@repo/db": [
-        "../../packages/db/src"
-      ],
-      "@repo/shared": [
-        "../../packages/shared/src"
-      ]
-    }
+    "skipLibCheck": true
   },
-  "include": [
-    "src"
-, "src/index.ts"  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["api/**/*.ts", "src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
