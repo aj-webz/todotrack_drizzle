@@ -1,9 +1,9 @@
 {
-  "version": 2,
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/apps/api/dist/index.js"
+  "buildCommand": "pnpm --filter api build",
+  "outputDirectory": "apps/api/dist",
+  "functions": {
+    "apps/api/dist/index.js": {
+      "runtime": "nodejs20.x"
     }
-  ]
+  }
 }
