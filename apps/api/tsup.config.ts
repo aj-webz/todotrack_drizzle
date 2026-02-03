@@ -8,7 +8,7 @@ export default defineConfig({
     sourcemap: true,                       // optional, for debugging
     clean: true,                           // clear dist before build
     bundle: true,                          // bundle dependencies
-    dts: true,                             // generate type declarations
+    dts: false,                             // generate type declarations
     noExternal: [
         "@repo/db",                          // local package
         "@repo/shared",                      // local package
