@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { nanoid } from "nanoid";
-import { serve } from "@hono/node-server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 
