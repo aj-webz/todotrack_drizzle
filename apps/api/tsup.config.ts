@@ -11,5 +11,12 @@ export default defineConfig({
   splitting: false,
   clean: true,
 
-  noExternal: ["@repo/db", "@repo/shared"]
+ 
+  noExternal: [
+    "@repo/shared",
+    "@repo/db"
+  ],
+
+
+  tsconfig: "./tsconfig.json"
 });
