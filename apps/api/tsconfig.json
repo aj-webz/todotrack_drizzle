@@ -3,6 +3,6 @@
   "compilerOptions": {
     "skipLibCheck": true
   },
-  "include": ["api/**/*.ts", "src/**/*.ts"],
+  "include": ["api/**/*.ts", "src/**/*.ts", "index.ts"],
   "exclude": ["node_modules", "dist"]
 }

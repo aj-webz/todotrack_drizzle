@@ -1,20 +1,15 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["api/index.ts"],
+  entry: ["index.ts"],
   outDir: "dist",
 
   format: ["esm"],
   target: "node20",
 
-  clean: true,
-  sourcemap: true,
-
   bundle: true,
   splitting: false,
+  clean: true,
 
-  noExternal: [
-    "@repo/db",
-    "@repo/shared"
-  ]
+  noExternal: ["@repo/db", "@repo/shared"]
 });
